@@ -1,0 +1,186 @@
+@model List<FUNewsManagement_FE.Models.TagViewModel>
+@{
+    ViewData["Title"] = "Quản lý Thẻ (Tags)";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <div>
+        <h2 class="fw-bold mb-1"><i class="bi bi-tags text-primary me-2"></i>Quản lý Thẻ (Tag Management)</h2>
+        <p class="text-muted small mb-0">Tìm kiếm, tạo mới và quản lý các thẻ từ khóa bài viết</p>
+    </div>
+    <div>
+        <button type="button" class="btn btn-primary shadow-sm" data-bs-toggle="modal" data-bs-target="#createTagModal">
+            <i class="bi bi-plus-circle me-1"></i>Thêm thẻ Tag mới
+        </button>
+    </div>
+</div>
+
+<!-- Search Bar -->
+<div class="card mb-3 bg-white">
+    <div class="card-body p-3">
+        <form method="get" class="row g-2 align-items-center">
+            <div class="col-md-6">
+                <div class="input-group input-group-sm">
+                    <span class="input-group-text"><i class="bi bi-search"></i></span>
+                    <input type="text" name="search" value="@ViewBag.Search" class="form-control" placeholder="Tìm kiếm tên thẻ tag hoặc ghi chú..." />
+                </div>
+            </div>
+            <div class="col-md-2">
+                <button type="submit" class="btn btn-secondary btn-sm w-100">Tìm kiếm</button>
+            </div>
+            @if (!string.IsNullOrEmpty(ViewBag.Search))
+            {
+                <div class="col-md-2">
+                    <a asp-action="Index" class="btn btn-outline-secondary btn-sm">Xóa bộ lọc</a>
+                </div>
+            }
+        </form>
+    </div>
+</div>
+
+<div class="card shadow-sm">
+    <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+            <thead class="table-light">
+                <tr>
+                    <th style="width: 60px;">#</th>
+                    <th>Tên thẻ Tag</th>
+                    <th>Ghi chú giải thích</th>
+                    <th class="text-center">Số bài viết đang dùng</th>
+                    <th class="text-end" style="width: 220px;">Thao tác</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model != null && Model.Any())
+                {
+                    foreach (var t in Model)
+                    {
+                        <tr>
+                            <td class="fw-bold text-muted">@t.TagID</td>
+                            <td>
+                                <span class="badge bg-primary-subtle text-primary border border-primary-subtle fs-6">
+                                    #@t.TagName
+                                </span>
+                            </td>
+                            <td class="small text-muted">@(string.IsNullOrEmpty(t.Note) ? "—" : t.Note)</td>
+                            <td class="text-center">
+                                <span class="badge @(t.ArticleCount > 0 ? "bg-info text-dark" : "bg-light text-muted border") rounded-pill px-3">
+                                    @t.ArticleCount bài viết
+                                </span>
+                            </td>
+                            <td class="text-end">
+                                <a asp-action="Articles" asp-route-id="@t.TagID" class="btn btn-sm btn-outline-info me-1" title="Xem danh sách bài viết dùng thẻ này">
+                                    <i class="bi bi-newspaper me-1"></i>Xem bài viết
+                                </a>
+                                <button type="button" class="btn btn-sm btn-outline-primary me-1"
+                                        onclick="openEditTagModal(@t.TagID, '@Html.Raw(JavaScriptEscape(t.TagName))', '@Html.Raw(JavaScriptEscape(t.Note ?? ""))')">
+                                    <i class="bi bi-pencil"></i>
+                                </button>
+                                <button type="button" class="btn btn-sm btn-outline-danger"
+                                        onclick="confirmDeleteTag(@t.TagID, '@Html.Raw(JavaScriptEscape(t.TagName))')">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            </td>
+                        </tr>
+                    }
+                }
+                else
+                {
+                    <tr>
+                        <td colspan="5" class="text-center text-muted py-5">
+                            <i class="bi bi-tag fs-1 d-block mb-2"></i>Không tìm thấy thẻ tag nào.
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Modal Create Tag -->
+<div class="modal fade" id="createTagModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form asp-action="Create" method="post">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title"><i class="bi bi-tag-fill me-2"></i>Thêm thẻ Tag mới</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body p-4">
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Tên thẻ Tag <span class="text-danger">*</span> (Không trùng lặp)</label>
+                        <div class="input-group">
+                            <span class="input-group-text">#</span>
+                            <input type="text" name="tagName" class="form-control" placeholder="Ví dụ: AI, DotNet8..." required />
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Ghi chú / Mô tả ngắn</label>
+                        <textarea name="note" class="form-control" rows="3" placeholder="Mô tả ý nghĩa của thẻ..."></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                    <button type="submit" class="btn btn-primary"><i class="bi bi-save me-1"></i>Lưu thẻ Tag</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Edit Tag -->
+<div class="modal fade" id="editTagModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form id="editTagForm" method="post">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title"><i class="bi bi-pencil-square me-2"></i>Chỉnh sửa thẻ Tag</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body p-4">
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Tên thẻ Tag <span class="text-danger">*</span></label>
+                        <div class="input-group">
+                            <span class="input-group-text">#</span>
+                            <input type="text" name="tagName" id="editTagName" class="form-control" required />
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Ghi chú</label>
+                        <textarea name="note" id="editTagNote" class="form-control" rows="3"></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                    <button type="submit" class="btn btn-primary"><i class="bi bi-save me-1"></i>Cập nhật</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<form id="deleteTagForm" method="post" style="display:none;"></form>
+
+@functions {
+    public string JavaScriptEscape(string input) =>
+        string.IsNullOrEmpty(input) ? "" : input.Replace("\\", "\\\\").Replace("'", "\\'").Replace("\"", "\\\"").Replace("\r", "").Replace("\n", "\\n");
+}
+
+@section Scripts {
+<script>
+    function openEditTagModal(id, name, note) {
+        document.getElementById('editTagForm').action = '/Tag/Edit/' + id;
+        document.getElementById('editTagName').value = name;
+        document.getElementById('editTagNote').value = note;
+        new bootstrap.Modal(document.getElementById('editTagModal')).show();
+    }
+
+    function confirmDeleteTag(id, name) {
+        confirmAction(`Bạn có chắc muốn xóa thẻ "#${name}"? Thẻ này sẽ được gỡ khỏi các bài viết liên quan.`, function() {
+            const form = document.getElementById('deleteTagForm');
+            form.action = '/Tag/Delete/' + id;
+            form.submit();
+        });
+    }
+</script>
+}

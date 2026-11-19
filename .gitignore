@@ -1,0 +1,10 @@
+**/bin/
+**/obj/
+.vs/
+*.user
+*.suo
+.env
+.env.*
+**/appsettings.Development.json
+**/appsettings.Local.json
+PRN232 ASSIGNMENT 02_*.pdf

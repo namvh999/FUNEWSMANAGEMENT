@@ -1,0 +1,128 @@
+@model FUNewsManagement_FE.Models.NewsArticleViewModel
+@{
+    ViewData["Title"] = Model.NewsTitle;
+    var recommendations = ViewBag.Recommendations as List<FUNewsManagement_FE.Models.RecommendedArticleViewModel> ?? new();
+}
+
+<div class="row justify-content-center">
+    <!-- Main Article Reading Column -->
+    <div class="col-lg-8">
+        <nav aria-label="breadcrumb" class="mb-3">
+            <ol class="breadcrumb small">
+                <li class="breadcrumb-item"><a asp-action="Index">Bài viết</a></li>
+                <li class="breadcrumb-item active">@Model.CategoryName</li>
+            </ol>
+        </nav>
+
+        <article class="card p-4 p-md-5 border-0 shadow-sm rounded-4 bg-white mb-4">
+            <header class="border-bottom pb-3 mb-4">
+                <div class="d-flex align-items-center gap-2 mb-2">
+                    <span class="badge bg-primary">@Model.CategoryName</span>
+                    @if (Model.NewsStatus)
+                    {
+                        <span class="badge bg-success-subtle text-success border border-success-subtle">Kích hoạt</span>
+                    }
+                    else
+                    {
+                        <span class="badge bg-danger-subtle text-danger border border-danger-subtle">Tạm ẩn</span>
+                    }
+                </div>
+
+                <h1 class="fw-bold display-6 text-dark mb-3">@Model.NewsTitle</h1>
+
+                @if (!string.IsNullOrWhiteSpace(Model.Headline))
+                {
+                    <p class="lead text-secondary fw-normal">@Model.Headline</p>
+                }
+
+                <div class="d-flex flex-wrap align-items-center justify-content-between text-muted small mt-3">
+                    <div>
+                        <i class="bi bi-person-circle me-1"></i>Tác giả: <strong>@Model.CreatedByName</strong>
+                        <span class="mx-2">•</span>
+                        <i class="bi bi-calendar3 me-1"></i>@Model.CreatedDate.ToString("dd/MM/yyyy HH:mm")
+                        @if (!string.IsNullOrWhiteSpace(Model.NewsSource))
+                        {
+                            <span class="mx-2">•</span>
+                            <i class="bi bi-link-45deg me-1"></i><span>Nguồn: <em>@Model.NewsSource</em></span>
+                        }
+                    </div>
+                    <div>
+                        <i class="bi bi-eye-fill me-1 text-info"></i><strong>@Model.ViewCount</strong> lượt xem
+                    </div>
+                </div>
+            </header>
+
+            @if (!string.IsNullOrWhiteSpace(Model.FeaturedImage))
+            {
+                <div class="mb-4 text-center">
+                    <img src="@Model.FeaturedImage" alt="@Model.NewsTitle" class="img-fluid rounded-4 shadow-sm" style="max-height: 420px; object-fit: cover; width: 100%;" />
+                </div>
+            }
+
+            <div class="article-content fs-5 lh-lg text-dark mb-4" style="white-space: pre-line;">
+                @Model.NewsContent
+            </div>
+
+            <!-- Tags Section -->
+            @if (Model.Tags != null && Model.Tags.Any())
+            {
+                <footer class="border-top pt-3 mt-4">
+                    <div class="d-flex align-items-center flex-wrap gap-2">
+                        <span class="fw-bold small text-muted"><i class="bi bi-tags-fill me-1"></i>Thẻ liên quan:</span>
+                        @foreach (var t in Model.Tags)
+                        {
+                            <a asp-controller="Tag" asp-action="Articles" asp-route-id="@t.TagID" class="badge bg-light text-primary border text-decoration-none py-2 px-3 rounded-pill">
+                                #@t.TagName
+                            </a>
+                        }
+                    </div>
+                </footer>
+            }
+        </article>
+    </div>
+
+    <!-- Related Articles Sidebar (Section 4.5: Up to 3 related articles) -->
+    <div class="col-lg-4">
+        <div class="card border-0 shadow-sm rounded-4 p-3 bg-white sticky-top" style="top: 80px;">
+            <h5 class="fw-bold border-bottom pb-2 mb-3">
+                <i class="bi bi-lightbulb-fill text-warning me-2"></i>3 Bài viết liên quan
+            </h5>
+
+            @if (recommendations != null && recommendations.Any())
+            {
+                <div class="d-flex flex-column gap-3">
+                    @foreach (var rec in recommendations)
+                    {
+                        <div class="card border p-3 rounded-3 hover-shadow transition">
+                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                <span class="badge bg-light text-dark border small">@rec.CategoryName</span>
+                                <span class="badge bg-warning-subtle text-warning-emphasis small"><i class="bi bi-magic me-1"></i>@rec.MatchReason</span>
+                            </div>
+                            <h6 class="fw-bold mb-1">
+                                <a asp-action="Detail" asp-route-id="@rec.NewsArticleID" class="text-decoration-none text-dark hover-primary">
+                                    @rec.NewsTitle
+                                </a>
+                            </h6>
+                            <div class="d-flex justify-content-between text-muted small mt-2">
+                                <span><i class="bi bi-calendar-event me-1"></i>@rec.CreatedDate.ToString("dd/MM/yyyy")</span>
+                                <span><i class="bi bi-eye me-1"></i>@rec.ViewCount</span>
+                            </div>
+                        </div>
+                    }
+                </div>
+            }
+            else
+            {
+                <div class="text-center text-muted py-4 small">
+                    <i class="bi bi-search fs-2 d-block mb-1"></i>Chưa có bài viết liên quan.
+                </div>
+            }
+
+            <div class="mt-4 pt-3 border-top text-center">
+                <a asp-action="Index" class="btn btn-outline-secondary btn-sm w-100">
+                    <i class="bi bi-arrow-left me-1"></i>Quay lại danh sách tin
+                </a>
+            </div>
+        </div>
+    </div>
+</div>

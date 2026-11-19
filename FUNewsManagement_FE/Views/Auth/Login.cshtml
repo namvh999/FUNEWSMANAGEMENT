@@ -1,0 +1,56 @@
+@model FUNewsManagement_FE.Models.LoginViewModel
+@{
+    ViewData["Title"] = "Đăng nhập hệ thống";
+    Layout = "_Layout";
+}
+
+<div class="row justify-content-center align-items-center mt-5">
+    <div class="col-md-5 col-lg-4">
+        <div class="card shadow-lg border-0 rounded-4">
+            <div class="card-header bg-primary text-white text-center py-4 rounded-top-4">
+                <i class="bi bi-shield-lock-fill fs-1"></i>
+                <h3 class="fw-bold mt-2 mb-0">FUNews System</h3>
+                <p class="small text-white-50 mb-0">Hệ thống Quản lý Tin tức Phân tán v2</p>
+            </div>
+            <div class="card-body p-4">
+                @if (ViewBag.Error != null)
+                {
+                    <div class="alert alert-danger alert-dismissible fade show small" role="alert">
+                        <i class="bi bi-exclamation-octagon-fill me-1"></i>@ViewBag.Error
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                }
+
+                <form asp-action="Login" method="post">
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold small">Địa chỉ Email</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="bi bi-envelope"></i></span>
+                            <input asp-for="Email" type="email" class="form-control" placeholder="admin@funews.com" required autofocus />
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label fw-semibold small">Mật khẩu</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="bi bi-key"></i></span>
+                            <input asp-for="Password" type="password" class="form-control" placeholder="••••••••" required />
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary w-100 py-2 fw-semibold shadow-sm">
+                        <i class="bi bi-box-arrow-in-right me-1"></i>Đăng nhập
+                    </button>
+                </form>
+
+                <div class="mt-4 p-3 bg-light rounded small border">
+                    <div class="fw-bold text-muted mb-1"><i class="bi bi-info-circle me-1"></i>Tài khoản dùng thử (Mặc định):</div>
+                    <ul class="mb-0 ps-3 text-secondary">
+                        <li><strong>Admin:</strong> <code>admin@funews.com</code> / <code>admin@123</code></li>
+                        <li><strong>Staff:</strong> <code>staff1@funews.com</code> / <code>staff@123</code></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
